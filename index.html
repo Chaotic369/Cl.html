@@ -8,10 +8,16 @@
         :root {
             --bg-color: #000432;
             --text-color: #f8f9fa;
+            
+            /* Base Colors */
             --tokyo: #6a1b9a;        /* Deep Purple */
             --london: #2962ff;       /* Bright Blue */
             --new-york: #00e5ff;     /* Vibrant Cyan */
             --sydney: #ffc107;       /* Golden Yellow */
+            
+            /* Solid Blended Colors for Overlaps */
+            --tokyo-london: #493ecc; /* Solid blend of Purple and Blue */
+            --london-ny: #14a3ff;    /* Solid blend of Blue and Cyan */
         }
 
         body {
@@ -35,42 +41,87 @@
         }
 
         /* --- Timeline Styles --- */
-        .timeline-container {
+        .timeline-wrapper {
             width: 100%;
             max-width: 1200px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .timeline-container {
+            width: 100%;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 30px;
+            border-radius: 12px;
             padding: 10px;
             box-sizing: border-box;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
 
         #timeline {
             display: flex;
             width: 100%;
-            height: 50px;
-            border-radius: 25px;
+            height: 60px;
+            border-radius: 6px;
             overflow: hidden;
+            position: relative;
         }
 
         .segment {
             height: 100%;
             cursor: pointer;
             transition: filter 0.2s;
+            /* Creates the separating lines between sessions */
+            border-right: 2px solid #ffffff; 
+            box-sizing: border-box;
+        }
+        
+        .segment:last-child {
+            border-right: none;
         }
 
         .segment:hover {
             filter: brightness(1.2);
         }
 
+        /* --- Axis & Time Markers --- */
+        #axis {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            margin-top: 10px;
+        }
+
+        .tick {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translateX(-50%);
+        }
+
+        .tick-line {
+            width: 2px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .tick-label {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #b0b5c1;
+            white-space: nowrap;
+        }
+
         /* --- Legend Styles --- */
         #legend {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             width: 100%;
             max-width: 1200px;
-            margin-top: 60px;
+            margin-top: 20px;
         }
 
         .legend-item {
@@ -91,9 +142,21 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
+        .legend-content {
+            display: flex;
+            flex-direction: column;
+        }
+
         .legend-text {
             font-size: 0.95rem;
-            line-height: 1.4;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .legend-time {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #aaa;
         }
 
         /* --- Tooltip Styles --- */
@@ -117,14 +180,7 @@
 
         .tooltip-title {
             font-weight: bold;
-            margin-bottom: 5px;
             color: var(--text-color);
-        }
-        
-        .tooltip-time {
-            color: #aaa;
-            font-family: monospace;
-            font-size: 0.85rem;
         }
     </style>
 </head>
@@ -132,8 +188,11 @@
 
     <h1>Global Forex Market Cycle</h1>
 
-    <div class="timeline-container">
-        <div id="timeline"></div>
+    <div class="timeline-wrapper">
+        <div class="timeline-container">
+            <div id="timeline"></div>
+        </div>
+        <div id="axis"></div>
     </div>
 
     <div id="legend"></div>
@@ -144,7 +203,7 @@
         // Total seconds in a 24-hour day
         const TOTAL_SECONDS = 86400;
 
-        // Session data mapping based on exact second ranges
+        // Session data mapping using solid colors for overlaps
         const sessions = [
             { 
                 name: "Tokyo Session Only", 
@@ -156,7 +215,7 @@
                 name: "Tokyo & London Overlap", 
                 start: 25200, 
                 end: 32399, 
-                bg: "linear-gradient(90deg, var(--tokyo), var(--london))" 
+                bg: "var(--tokyo-london)" 
             },
             { 
                 name: "London Session Only", 
@@ -168,7 +227,7 @@
                 name: "London & New York Overlap", 
                 start: 43200, 
                 end: 57599, 
-                bg: "linear-gradient(90deg, var(--london), var(--new-york))" 
+                bg: "var(--london-ny)" 
             },
             { 
                 name: "New York Session Only", 
@@ -184,11 +243,15 @@
             }
         ];
 
+        // Specific points in seconds where we want to draw a vertical marker line
+        const boundaries = [0, 25200, 32400, 43200, 57600, 75600, 86400];
+
         const timelineEl = document.getElementById('timeline');
+        const axisEl = document.getElementById('axis');
         const legendEl = document.getElementById('legend');
         const tooltipEl = document.getElementById('tooltip');
 
-        // Render Timeline and Legend
+        // 1. Render Timeline and Legend
         sessions.forEach(session => {
             // Calculate width percentage based on duration
             const duration = (session.end - session.start) + 1;
@@ -205,12 +268,10 @@
                 tooltipEl.style.opacity = '1';
                 tooltipEl.innerHTML = `
                     <div class="tooltip-title">${session.name}</div>
-                    <div class="tooltip-time">${session.start.toLocaleString()}s — ${session.end.toLocaleString()}s</div>
                 `;
             });
 
             segment.addEventListener('mousemove', (e) => {
-                // Offset the tooltip slightly above the cursor
                 tooltipEl.style.left = `${e.pageX}px`;
                 tooltipEl.style.top = `${e.pageY - 20}px`;
             });
@@ -221,14 +282,43 @@
 
             timelineEl.appendChild(segment);
 
-            // Create legend item
+            // Create legend item with explicit seconds
             const legendItem = document.createElement('div');
             legendItem.className = 'legend-item';
             legendItem.innerHTML = `
                 <div class="color-box" style="background: ${session.bg};"></div>
-                <div class="legend-text">${session.name}</div>
+                <div class="legend-content">
+                    <div class="legend-text">${session.name}</div>
+                    <div class="legend-time">${session.start.toLocaleString()}s — ${session.end.toLocaleString()}s</div>
+                </div>
             `;
             legendEl.appendChild(legendItem);
+        });
+
+        // 2. Render Axis Markers (Time in Seconds)
+        boundaries.forEach(time => {
+            const leftPercent = (time / TOTAL_SECONDS) * 100;
+            
+            const tick = document.createElement('div');
+            tick.className = 'tick';
+            
+            // Adjust positioning so the first and last labels don't get cut off
+            if (time === 0) {
+                tick.style.left = '0%';
+                tick.style.transform = 'translateX(0)';
+            } else if (time === TOTAL_SECONDS) {
+                tick.style.left = '100%';
+                tick.style.transform = 'translateX(-100%)';
+            } else {
+                tick.style.left = `${leftPercent}%`;
+            }
+
+            tick.innerHTML = `
+                <div class="tick-line"></div>
+                <div class="tick-label">${time.toLocaleString()}s</div>
+            `;
+            
+            axisEl.appendChild(tick);
         });
     </script>
 </body>
