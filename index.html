@@ -3,497 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forex Seconds Timeline</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&display=swap" rel="stylesheet">
-
+    <title>24-Hour Forex Trading Sessions</title>
     <style>
         :root {
-            --bg: #000432; /* Deep blue theme */
-            --surface: #0a0e29;
-            --border: rgba(255,255,255,0.1);
-            --text-main: #FFFFFF;
-            --text-dim: rgba(255,255,255,0.5);
-            --font: 'JetBrains Mono', monospace;
-            
-            /* Session Colors */
-            --c-wel: #00E5FF; /* Cyan */
-            --c-syd: #2979FF; /* Blue */
-            --c-tok: #FFC400; /* Amber */
-            --c-lon: #00E676; /* Green */
-            --c-ny:  #FF1744; /* Red */
+            --bg-color: #000432;
+            --text-color: #f8f9fa;
+            --tokyo: #6a1b9a;        /* Deep Purple */
+            --london: #2962ff;       /* Bright Blue */
+            --new-york: #00e5ff;     /* Vibrant Cyan */
+            --sydney: #ffc107;       /* Golden Yellow */
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: var(--font);
-            min-height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
-        .dashboard {
+        h1 {
+            margin-bottom: 50px;
+            text-align: center;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* --- Timeline Styles --- */
+        .timeline-container {
             width: 100%;
             max-width: 1200px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 10px;
+            box-sizing: border-box;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- METRICS HEADER --- */
-        .metrics-grid {
+        #timeline {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 50px;
-        }
-
-        .metric-label {
-            font-size: 12px;
-            color: var(--text-dim);
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .sec-value {
-            font-size: 56px;
-            font-weight: 800;
-            color: var(--c-wel);
-            line-height: 1;
-            text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
-        }
-
-        .sec-total {
-            font-size: 24px;
-            color: var(--text-dim);
-            font-weight: 400;
-        }
-
-        .clock-value {
-            font-size: 32px;
-            font-weight: 700;
-            text-align: right;
-        }
-        
-        .active-sessions {
-            font-size: 14px;
-            color: var(--text-main);
-            text-align: right;
-            margin-top: 8px;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-        }
-
-        /* --- SINGLE LINE TIMELINE --- */
-        .timeline-wrapper {
-            position: relative;
             width: 100%;
-            margin-bottom: 30px;
+            height: 50px;
+            border-radius: 25px;
+            overflow: hidden;
         }
 
-        .single-line-track {
-                    position: relative;
-                    width: 100%;
-                    height: 32px;
-                    background: rgba(255,255,255,0.03);
-                    border-radius: 8px;
-                    border: 1px solid rgba(255,255,255,0.08);
-                    overflow: hidden;
-                }
-
-                /* The multisections / lanes inside the single line */
-                .session-block {
-                    position: absolute;
-                    top: 0;
-                    bottom: 0;
-                    border-radius: 4px;
-                    opacity: 0.65;
-                    mix-blend-mode: screen;
-                }
-
-                .lane-wel { background: var(--c-wel); box-shadow: 0 0 8px var(--c-wel); }
-                .lane-syd { background: var(--c-syd); box-shadow: 0 0 8px var(--c-syd); }
-                .lane-tok { background: var(--c-tok); box-shadow: 0 0 8px var(--c-tok); }
-                .lane-lon { background: var(--c-lon); box-shadow: 0 0 8px var(--c-lon); }
-                .lane-ny  { background: var(--c-ny);  box-shadow: 0 0 8px var(--c-ny);  }
-
-        /* Grid lines inside track */
-        .grid-line {
-            position: absolute;
-            top: 0; bottom: 0;
-            width: 1px;
-            background: rgba(255,255,255,0.05);
-            pointer-events: none;
-        }
-
-        /* Live Cursor Overlay */
-        .cursor-wrapper {
-            position: absolute;
-            top: -10px;
-            bottom: -10px;
-            width: 2px;
-            z-index: 10;
-            transition: left 1s linear;
-        }
-        .cursor-line {
-            width: 100%;
+        .segment {
             height: 100%;
-            background: #FFF;
-            box-shadow: 0 0 10px #FFF, 0 0 20px #FFF;
+            cursor: pointer;
+            transition: filter 0.2s;
         }
-        .cursor-head {
+
+        .segment:hover {
+            filter: brightness(1.2);
+        }
+
+        /* --- Legend Styles --- */
+        #legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 60px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .legend-text {
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        /* --- Tooltip Styles --- */
+        #tooltip {
             position: absolute;
-            top: -6px;
-            left: -4px;
-            width: 10px;
-            height: 10px;
-            background: #FFF;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #FFF;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            opacity: 0;
+            transform: translate(-50%, -100%);
+            white-space: nowrap;
+            transition: opacity 0.15s ease-in-out;
+            z-index: 1000;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            text-align: center;
         }
 
-        /* Overlap Identifiers */
-                .overlap-label {
-                    position: absolute;
-                    top: 0; bottom: 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 10px;
-                    font-weight: 800;
-                    color: rgba(255,255,255,0.9);
-                    letter-spacing: 0.1em;
-                    pointer-events: none;
-                    z-index: 5;
-                    text-shadow: 0 0 4px rgba(0,0,0,0.8);
-                }
-
-                /* X-Axis Labels */
-                .x-axis {
-                    position: relative;
-                    width: 100%;
-                    height: 20px;
-                    margin-top: 10px;
-                }
-                .tick-label {
-                    position: absolute;
-                    transform: translateX(-50%);
-                    font-size: 11px;
-                    color: var(--text-dim);
-                    letter-spacing: 0.05em;
-                }
-
-                /* --- LEGEND --- */
-                .legend {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 15px;
-                    margin-top: 40px;
-                    padding-top: 30px;
-                    border-top: 1px solid var(--border);
-                }
-                .legend-group {
-                    display: flex;
-                    flex-wrap: wrap;
-                    align-items: center;
-                    gap: 20px;
-                }
-                .legend-title {
-                    font-size: 10px;
-                    color: var(--text-dim);
-                    letter-spacing: 0.15em;
-                    margin-right: 10px;
-                }
-                .legend-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 12px;
-                    font-weight: 700;
-                    letter-spacing: 0.1em;
-                    text-transform: uppercase;
-                }
-                .dot {
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 3px;
-                }
+        .tooltip-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
         
-                /* Simulated Overlap Colors for Legend */
-                .overlap-dot { position: relative; overflow: hidden; background: #111; }
-                .overlap-dot::before, .overlap-dot::after {
-                    content: ''; position: absolute; top: 0; bottom: 0; left: 0; right: 0;
-                    mix-blend-mode: screen; opacity: 0.65;
-                }
-                .syd-tok::before { background: var(--c-syd); } .syd-tok::after { background: var(--c-tok); }
-                .tok-lon::before { background: var(--c-tok); } .tok-lon::after { background: var(--c-lon); }
-                .lon-ny::before  { background: var(--c-lon); } .lon-ny::after  { background: var(--c-ny); }
+        .tooltip-time {
+            color: #aaa;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="metrics-grid">
-        <div>
-            <div class="metric-label">Daily Seconds Tracker (IST)</div>
-            <div class="sec-value">
-                <span id="live-seconds">00000</span>
-                <span class="sec-total"> / 86399</span>
-            </div>
-        </div>
-        <div>
-            <div class="metric-label" style="text-align: right;">Standard Clock (IST)</div>
-            <div class="clock-value" id="live-clock">--:--:--</div>
-            <div class="active-sessions" id="active-text">CALCULATING OVERLAPS...</div>
-        </div>
+    <h1>Global Forex Market Cycle</h1>
+
+    <div class="timeline-container">
+        <div id="timeline"></div>
     </div>
 
-    <div class="timeline-wrapper">
-        <div class="cursor-wrapper" id="cursor"><div class="cursor-head"></div><div class="cursor-line"></div></div>
-        
-        <div class="single-line-track" id="track">
-            <!-- Grid lines injected via JS -->
-            <!-- Session blocks injected via JS -->
-        </div>
+    <div id="legend"></div>
+    
+    <div id="tooltip"></div>
 
-        <div class="x-axis" id="x-axis">
-            <!-- Labels injected via JS -->
-        </div>
-    </div>
+    <script>
+        // Total seconds in a 24-hour day
+        const TOTAL_SECONDS = 86400;
 
-    <div class="legend">
-            <div class="legend-group">
-                <div class="legend-title">SESSIONS</div>
-                <div class="legend-item"><div class="dot" style="background: var(--c-wel);"></div> Wellington</div>
-                <div class="legend-item"><div class="dot" style="background: var(--c-syd);"></div> Sydney</div>
-                <div class="legend-item"><div class="dot" style="background: var(--c-tok);"></div> Tokyo</div>
-                <div class="legend-item"><div class="dot" style="background: var(--c-lon);"></div> London</div>
-                <div class="legend-item"><div class="dot" style="background: var(--c-ny);"></div> New York</div>
-            </div>
-            <div class="legend-group">
-                <div class="legend-title">MAJOR OVERLAPS</div>
-                <div class="legend-item"><div class="dot overlap-dot syd-tok"></div> Syd-Tok</div>
-                <div class="legend-item"><div class="dot overlap-dot tok-lon"></div> Tok-Lon</div>
-                <div class="legend-item"><div class="dot overlap-dot lon-ny"></div> Lon-NY</div>
-            </div>
-        </div>
-</div>
-
-<script>
-    /* --- TIMEZONE OFFSETS & IST CONVERSION --- */
-    function getOffsetForDate(tz, date) {
-        const fmt = new Intl.DateTimeFormat('en-US', {
-            timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        });
-        const p = {};
-        fmt.formatToParts(date).forEach(part => {
-            if (part.type !== 'literal') p[part.type] = +part.value;
-        });
-        const tzAsUTC = Date.UTC(p.year, p.month - 1, p.day, p.hour % 24, p.minute, p.second);
-        return (tzAsUTC - date.getTime()) / 3600000;
-    }
-
-    function localToISTHours(localHour, utcOffset) {
-        return ((localHour - utcOffset + 5.5) % 24 + 24) % 24;
-    }
-
-    /* Definition of major markets (Local Open/Close) */
-    const MARKET_CONFIG = [
-        { id: 'wel', name: 'Wellington', tz: 'Pacific/Auckland', open: 8, close: 17 },
-        { id: 'syd', name: 'Sydney',     tz: 'Australia/Sydney', open: 7, close: 16 },
-        { id: 'tok', name: 'Tokyo',      tz: 'Asia/Tokyo',       open: 9, close: 18 },
-        { id: 'lon', name: 'London',     tz: 'Europe/London',    open: 8, close: 17 },
-        { id: 'ny',  name: 'New York',   tz: 'America/New_York', open: 8, close: 17 }
-    ];
-
-    let processedMarkets = [];
-
-    function buildTimeline() {
-        const track = document.getElementById('track');
-        const xAxis = document.getElementById('x-axis');
-        track.innerHTML = '';
-        xAxis.innerHTML = '';
-        processedMarkets = [];
-
-        const now = new Date();
-
-        /* Draw background grid lines & X-axis labels every 3 hours */
-        for (let h = 0; h <= 24; h += 3) {
-            const pct = (h / 24) * 100;
-            
-            if (h > 0 && h < 24) {
-                const line = document.createElement('div');
-                line.className = 'grid-line';
-                line.style.left = `${pct}%`;
-                track.appendChild(line);
+        // Session data mapping based on exact second ranges
+        const sessions = [
+            { 
+                name: "Tokyo Session Only", 
+                start: 0, 
+                end: 25199, 
+                bg: "var(--tokyo)" 
+            },
+            { 
+                name: "Tokyo & London Overlap", 
+                start: 25200, 
+                end: 32399, 
+                bg: "linear-gradient(90deg, var(--tokyo), var(--london))" 
+            },
+            { 
+                name: "London Session Only", 
+                start: 32400, 
+                end: 43199, 
+                bg: "var(--london)" 
+            },
+            { 
+                name: "London & New York Overlap", 
+                start: 43200, 
+                end: 57599, 
+                bg: "linear-gradient(90deg, var(--london), var(--new-york))" 
+            },
+            { 
+                name: "New York Session Only", 
+                start: 57600, 
+                end: 75599, 
+                bg: "var(--new-york)" 
+            },
+            { 
+                name: "Sydney Session Only", 
+                start: 75600, 
+                end: 86399, 
+                bg: "var(--sydney)" 
             }
+        ];
 
-            const label = document.createElement('div');
-            label.className = 'tick-label';
-            label.style.left = `${pct}%`;
-            label.textContent = String(h).padStart(2, '0') + ':00';
-            xAxis.appendChild(label);
-        }
+        const timelineEl = document.getElementById('timeline');
+        const legendEl = document.getElementById('legend');
+        const tooltipEl = document.getElementById('tooltip');
 
-        /* Calculate current seconds and plot lanes */
-        MARKET_CONFIG.forEach(m => {
-            const offset = getOffsetForDate(m.tz, now);
-            const startIST = localToISTHours(m.open, offset);
-            const endIST = localToISTHours(m.close, offset);
+        // Render Timeline and Legend
+        sessions.forEach(session => {
+            // Calculate width percentage based on duration
+            const duration = (session.end - session.start) + 1;
+            const widthPercent = (duration / TOTAL_SECONDS) * 100;
 
-            const startSec = Math.round(startIST * 3600);
-            const endSec = Math.round(endIST * 3600);
+            // Create timeline segment
+            const segment = document.createElement('div');
+            segment.className = 'segment';
+            segment.style.width = `${widthPercent}%`;
+            segment.style.background = session.bg;
             
-            processedMarkets.push({
-                name: m.name,
-                start: startSec,
-                end: endSec
+            // Tooltip interactivity
+            segment.addEventListener('mouseenter', () => {
+                tooltipEl.style.opacity = '1';
+                tooltipEl.innerHTML = `
+                    <div class="tooltip-title">${session.name}</div>
+                    <div class="tooltip-time">${session.start.toLocaleString()}s — ${session.end.toLocaleString()}s</div>
+                `;
             });
 
-            // Helper to draw a segment block inside the single line track
-            const drawBlock = (s, e) => {
-                const block = document.createElement('div');
-                block.className = `session-block lane-${m.id}`;
-                block.style.left = `${(s / 86400) * 100}%`;
-                block.style.width = `${((e - s) / 86400) * 100}%`;
-                track.appendChild(block);
-            };
+            segment.addEventListener('mousemove', (e) => {
+                // Offset the tooltip slightly above the cursor
+                tooltipEl.style.left = `${e.pageX}px`;
+                tooltipEl.style.top = `${e.pageY - 20}px`;
+            });
 
-            // If session crosses midnight (e.g., NY), split it into two segments
-                        if (startSec >= endSec) {
-                            drawBlock(startSec, 86400); // Late night to midnight
-                            drawBlock(0, endSec);       // Midnight to early morning
-                        } else {
-                            drawBlock(startSec, endSec);
-                        }
-                    });
+            segment.addEventListener('mouseleave', () => {
+                tooltipEl.style.opacity = '0';
+            });
 
-                    /* --- INJECT OVERLAP IDENTIFIERS ON TRACK --- */
-                    const findOverlap = (m1Name, m2Name) => {
-                        const m1 = processedMarkets.find(m => m.name === m1Name);
-                        const m2 = processedMarkets.find(m => m.name === m2Name);
-                        if (!m1 || !m2) return [];
+            timelineEl.appendChild(segment);
 
-                        const getRanges = (m) => m.start >= m.end ? [[m.start, 86400], [0, m.end]] : [[m.start, m.end]];
-                        const r1 = getRanges(m1);
-                        const r2 = getRanges(m2);
-
-                        let overlaps = [];
-                        r1.forEach(a => {
-                            r2.forEach(b => {
-                                const maxStart = Math.max(a[0], b[0]);
-                                const minEnd = Math.min(a[1], b[1]);
-                                if (maxStart < minEnd) overlaps.push({ start: maxStart, end: minEnd });
-                            });
-                        });
-                        return overlaps;
-                    };
-
-                    const overlapsToMark = [
-                        { id: 'SYD-TOK', pairs: ['Sydney', 'Tokyo'] },
-                        { id: 'TOK-LON', pairs: ['Tokyo', 'London'] },
-                        { id: 'LON-NY', pairs: ['London', 'New York'] }
-                    ];
-
-                    overlapsToMark.forEach(ov => {
-                        findOverlap(ov.pairs[0], ov.pairs[1]).forEach(segment => {
-                            // Only label if the overlap is significant to avoid text crunch
-                            if (segment.end - segment.start > 3600) {
-                                const label = document.createElement('div');
-                                label.className = 'overlap-label';
-                                label.style.left = `${(segment.start / 86400) * 100}%`;
-                                label.style.width = `${((segment.end - segment.start) / 86400) * 100}%`;
-                                label.textContent = ov.id;
-                                track.appendChild(label);
-                            }
-                        });
-                    });
-                }
-
-                /* --- LIVE CLOCK ENGINE --- */
-    const IST_FMT = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Kolkata',
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    });
-
-    function tick() {
-        const now = new Date();
-        const p = {};
-        IST_FMT.formatToParts(now).forEach(part => {
-            if (part.type !== 'literal') p[part.type] = +part.value;
+            // Create legend item
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.innerHTML = `
+                <div class="color-box" style="background: ${session.bg};"></div>
+                <div class="legend-text">${session.name}</div>
+            `;
+            legendEl.appendChild(legendItem);
         });
-
-        // Format raw time values
-        const h = p.hour % 24;
-        const m = p.minute;
-        const s = p.second;
-        
-        const totalSeconds = (h * 3600) + (m * 60) + s;
-
-        // Update Text UIs
-        document.getElementById('live-seconds').textContent = String(totalSeconds).padStart(5, '0');
-        document.getElementById('live-clock').textContent = 
-            `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-
-        // Move Cursor Overlay
-        const cursor = document.getElementById('cursor');
-        cursor.style.left = `${(totalSeconds / 86400) * 100}%`;
-
-        // Determine Active Sessions for the text readout
-                const active = processedMarkets.filter(market => {
-                    if (market.start >= market.end) {
-                        return totalSeconds >= market.start || totalSeconds < market.end; // Midnight overlap
-                    }
-                    return totalSeconds >= market.start && totalSeconds < market.end;
-                }).map(m => m.name);
-
-                const activeTextEl = document.getElementById('active-text');
-                if (active.length === 0) {
-                    activeTextEl.textContent = 'NO MAJOR MARKETS OPEN';
-                    activeTextEl.style.color = 'var(--text-dim)';
-                    activeTextEl.style.textShadow = 'none';
-                } else {
-                    let displayText = active.join(' + ').toUpperCase();
-                    let color = 'var(--text-main)';
-                    let glow = 'none';
-            
-                    if (active.includes('London') && active.includes('New York')) {
-                        displayText = 'LON-NY OVERLAP (GOLDEN)';
-                        color = '#FFF'; glow = '0 0 10px rgba(255,255,255,0.5)';
-                    } else if (active.includes('Sydney') && active.includes('Tokyo')) {
-                        displayText = 'SYD-TOK OVERLAP';
-                        color = '#FFF'; glow = '0 0 10px rgba(255,255,255,0.5)';
-                    } else if (active.includes('Tokyo') && active.includes('London')) {
-                        displayText = 'TOK-LON OVERLAP';
-                        color = '#FFF'; glow = '0 0 10px rgba(255,255,255,0.5)';
-                    } else if (active.length === 1) {
-                        const singleId = MARKET_CONFIG.find(m => m.name === active[0]).id;
-                        color = `var(--c-${singleId})`;
-                    }
-
-                    activeTextEl.textContent = `ACTIVE: ${displayText}`;
-                    activeTextEl.style.color = color;
-                    activeTextEl.style.textShadow = glow;
-                }
-            }
-
-    /* Boot sequence */
-    buildTimeline();
-    tick();
-    setInterval(tick, 1000);
-    setInterval(buildTimeline, 3600000); // Re-calculate offsets/DST hourly
-
-</script>
+    </script>
 </body>
 </html>
