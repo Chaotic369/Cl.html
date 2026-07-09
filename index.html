@@ -10,14 +10,14 @@
             --text-color: #f8f9fa;
             
             /* Base Colors */
-            --tokyo: #6a1b9a;        /* Deep Purple */
-            --london: #2962ff;       /* Bright Blue */
-            --new-york: #00e5ff;     /* Vibrant Cyan */
-            --sydney: #ffc107;       /* Golden Yellow */
+            --tokyo: #6a1b9a;        
+            --london: #2962ff;       
+            --new-york: #00e5ff;     
+            --sydney: #ffc107;       
             
             /* Solid Blended Colors for Overlaps */
-            --tokyo-london: #493ecc; /* Solid blend of Purple and Blue */
-            --london-ny: #14a3ff;    /* Solid blend of Blue and Cyan */
+            --tokyo-london: #493ecc; 
+            --london-ny: #14a3ff;    
         }
 
         body {
@@ -40,22 +40,16 @@
             letter-spacing: 1px;
         }
 
-        /* --- Timeline Styles --- */
+        /* --- Timeline & Axis Container --- */
         .timeline-wrapper {
             width: 100%;
             max-width: 1200px;
-            margin-bottom: 40px;
-            position: relative;
-        }
-
-        .timeline-container {
-            width: 100%;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            padding: 10px;
+            padding: 20px;
             box-sizing: border-box;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            position: relative;
+            margin-bottom: 40px;
         }
 
         #timeline {
@@ -71,7 +65,6 @@
             height: 100%;
             cursor: pointer;
             transition: filter 0.2s;
-            /* Creates the separating lines between sessions */
             border-right: 2px solid #ffffff; 
             box-sizing: border-box;
         }
@@ -89,7 +82,7 @@
             position: relative;
             width: 100%;
             height: 40px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .tick {
@@ -97,13 +90,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transform: translateX(-50%);
+            top: 0;
         }
 
         .tick-line {
             width: 2px;
-            height: 10px;
-            background-color: rgba(255, 255, 255, 0.5);
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.7);
             margin-bottom: 5px;
         }
 
@@ -121,7 +114,6 @@
             gap: 20px;
             width: 100%;
             max-width: 1200px;
-            margin-top: 20px;
         }
 
         .legend-item {
@@ -189,9 +181,7 @@
     <h1>Global Forex Market Cycle</h1>
 
     <div class="timeline-wrapper">
-        <div class="timeline-container">
-            <div id="timeline"></div>
-        </div>
+        <div id="timeline"></div>
         <div id="axis"></div>
     </div>
 
@@ -200,51 +190,19 @@
     <div id="tooltip"></div>
 
     <script>
-        // Total seconds in a 24-hour day
         const TOTAL_SECONDS = 86400;
 
-        // Session data mapping using solid colors for overlaps
         const sessions = [
-            { 
-                name: "Tokyo Session Only", 
-                start: 0, 
-                end: 25199, 
-                bg: "var(--tokyo)" 
-            },
-            { 
-                name: "Tokyo & London Overlap", 
-                start: 25200, 
-                end: 32399, 
-                bg: "var(--tokyo-london)" 
-            },
-            { 
-                name: "London Session Only", 
-                start: 32400, 
-                end: 43199, 
-                bg: "var(--london)" 
-            },
-            { 
-                name: "London & New York Overlap", 
-                start: 43200, 
-                end: 57599, 
-                bg: "var(--london-ny)" 
-            },
-            { 
-                name: "New York Session Only", 
-                start: 57600, 
-                end: 75599, 
-                bg: "var(--new-york)" 
-            },
-            { 
-                name: "Sydney Session Only", 
-                start: 75600, 
-                end: 86399, 
-                bg: "var(--sydney)" 
-            }
+            { name: "Tokyo Session Only", start: 0, end: 25199, bg: "var(--tokyo)" },
+            { name: "Tokyo & London Overlap", start: 25200, end: 32399, bg: "var(--tokyo-london)" },
+            { name: "London Session Only", start: 32400, end: 43199, bg: "var(--london)" },
+            { name: "London & New York Overlap", start: 43200, end: 57599, bg: "var(--london-ny)" },
+            { name: "New York Session Only", start: 57600, end: 75599, bg: "var(--new-york)" },
+            { name: "Sydney Session Only", start: 75600, end: 86399, bg: "var(--sydney)" }
         ];
 
-        // Specific points in seconds where we want to draw a vertical marker line
-        const boundaries = [0, 25200, 32400, 43200, 57600, 75600, 86400];
+        // Mapped boundaries perfectly to the start (0) and end-points of each segment
+        const boundaries = [0, 25199, 32399, 43199, 57599, 75599, 86399];
 
         const timelineEl = document.getElementById('timeline');
         const axisEl = document.getElementById('axis');
@@ -253,22 +211,17 @@
 
         // 1. Render Timeline and Legend
         sessions.forEach(session => {
-            // Calculate width percentage based on duration
             const duration = (session.end - session.start) + 1;
             const widthPercent = (duration / TOTAL_SECONDS) * 100;
 
-            // Create timeline segment
             const segment = document.createElement('div');
             segment.className = 'segment';
             segment.style.width = `${widthPercent}%`;
             segment.style.background = session.bg;
             
-            // Tooltip interactivity
             segment.addEventListener('mouseenter', () => {
                 tooltipEl.style.opacity = '1';
-                tooltipEl.innerHTML = `
-                    <div class="tooltip-title">${session.name}</div>
-                `;
+                tooltipEl.innerHTML = `<div class="tooltip-title">${session.name}</div>`;
             });
 
             segment.addEventListener('mousemove', (e) => {
@@ -282,7 +235,6 @@
 
             timelineEl.appendChild(segment);
 
-            // Create legend item with explicit seconds
             const legendItem = document.createElement('div');
             legendItem.className = 'legend-item';
             legendItem.innerHTML = `
@@ -295,22 +247,24 @@
             legendEl.appendChild(legendItem);
         });
 
-        // 2. Render Axis Markers (Time in Seconds)
-        boundaries.forEach(time => {
+        // 2. Render Aligned Axis Markers
+        boundaries.forEach((time, index) => {
+            // Calculate percentage based on the true 86,400 width divisor
             const leftPercent = (time / TOTAL_SECONDS) * 100;
             
             const tick = document.createElement('div');
             tick.className = 'tick';
             
-            // Adjust positioning so the first and last labels don't get cut off
-            if (time === 0) {
+            // Explicit transforms to keep edge labels inside the container limits
+            if (index === 0) {
                 tick.style.left = '0%';
                 tick.style.transform = 'translateX(0)';
-            } else if (time === TOTAL_SECONDS) {
+            } else if (index === boundaries.length - 1) {
                 tick.style.left = '100%';
                 tick.style.transform = 'translateX(-100%)';
             } else {
                 tick.style.left = `${leftPercent}%`;
+                tick.style.transform = 'translateX(-50%)';
             }
 
             tick.innerHTML = `
