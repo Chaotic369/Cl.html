@@ -371,16 +371,57 @@
             };
 
             // If session crosses midnight (e.g., NY), split it into two segments
-            if (startSec >= endSec) {
-                drawBlock(startSec, 86400); // Late night to midnight
-                drawBlock(0, endSec);       // Midnight to early morning
-            } else {
-                drawBlock(startSec, endSec);
-            }
-        });
-    }
+                        if (startSec >= endSec) {
+                            drawBlock(startSec, 86400); // Late night to midnight
+                            drawBlock(0, endSec);       // Midnight to early morning
+                        } else {
+                            drawBlock(startSec, endSec);
+                        }
+                    });
 
-    /* --- LIVE CLOCK ENGINE --- */
+                    /* --- INJECT OVERLAP IDENTIFIERS ON TRACK --- */
+                    const findOverlap = (m1Name, m2Name) => {
+                        const m1 = processedMarkets.find(m => m.name === m1Name);
+                        const m2 = processedMarkets.find(m => m.name === m2Name);
+                        if (!m1 || !m2) return [];
+
+                        const getRanges = (m) => m.start >= m.end ? [[m.start, 86400], [0, m.end]] : [[m.start, m.end]];
+                        const r1 = getRanges(m1);
+                        const r2 = getRanges(m2);
+
+                        let overlaps = [];
+                        r1.forEach(a => {
+                            r2.forEach(b => {
+                                const maxStart = Math.max(a[0], b[0]);
+                                const minEnd = Math.min(a[1], b[1]);
+                                if (maxStart < minEnd) overlaps.push({ start: maxStart, end: minEnd });
+                            });
+                        });
+                        return overlaps;
+                    };
+
+                    const overlapsToMark = [
+                        { id: 'SYD-TOK', pairs: ['Sydney', 'Tokyo'] },
+                        { id: 'TOK-LON', pairs: ['Tokyo', 'London'] },
+                        { id: 'LON-NY', pairs: ['London', 'New York'] }
+                    ];
+
+                    overlapsToMark.forEach(ov => {
+                        findOverlap(ov.pairs[0], ov.pairs[1]).forEach(segment => {
+                            // Only label if the overlap is significant to avoid text crunch
+                            if (segment.end - segment.start > 3600) {
+                                const label = document.createElement('div');
+                                label.className = 'overlap-label';
+                                label.style.left = `${(segment.start / 86400) * 100}%`;
+                                label.style.width = `${((segment.end - segment.start) / 86400) * 100}%`;
+                                label.textContent = ov.id;
+                                track.appendChild(label);
+                            }
+                        });
+                    });
+                }
+
+                /* --- LIVE CLOCK ENGINE --- */
     const IST_FMT = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Asia/Kolkata',
         hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
