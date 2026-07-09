@@ -162,44 +162,82 @@
             box-shadow: 0 0 10px #FFF;
         }
 
-        /* X-Axis Labels */
-        .x-axis {
-            position: relative;
-            width: 100%;
-            height: 20px;
-            margin-top: 10px;
-        }
-        .tick-label {
-            position: absolute;
-            transform: translateX(-50%);
-            font-size: 11px;
-            color: var(--text-dim);
-            letter-spacing: 0.05em;
-        }
+        /* Overlap Identifiers */
+                .overlap-label {
+                    position: absolute;
+                    top: 0; bottom: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 10px;
+                    font-weight: 800;
+                    color: rgba(255,255,255,0.9);
+                    letter-spacing: 0.1em;
+                    pointer-events: none;
+                    z-index: 5;
+                    text-shadow: 0 0 4px rgba(0,0,0,0.8);
+                }
 
-        /* --- LEGEND --- */
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid var(--border);
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-        }
+                /* X-Axis Labels */
+                .x-axis {
+                    position: relative;
+                    width: 100%;
+                    height: 20px;
+                    margin-top: 10px;
+                }
+                .tick-label {
+                    position: absolute;
+                    transform: translateX(-50%);
+                    font-size: 11px;
+                    color: var(--text-dim);
+                    letter-spacing: 0.05em;
+                }
+
+                /* --- LEGEND --- */
+                .legend {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+                    margin-top: 40px;
+                    padding-top: 30px;
+                    border-top: 1px solid var(--border);
+                }
+                .legend-group {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 20px;
+                }
+                .legend-title {
+                    font-size: 10px;
+                    color: var(--text-dim);
+                    letter-spacing: 0.15em;
+                    margin-right: 10px;
+                }
+                .legend-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.1em;
+                    text-transform: uppercase;
+                }
+                .dot {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 3px;
+                }
+        
+                /* Simulated Overlap Colors for Legend */
+                .overlap-dot { position: relative; overflow: hidden; background: #111; }
+                .overlap-dot::before, .overlap-dot::after {
+                    content: ''; position: absolute; top: 0; bottom: 0; left: 0; right: 0;
+                    mix-blend-mode: screen; opacity: 0.65;
+                }
+                .syd-tok::before { background: var(--c-syd); } .syd-tok::after { background: var(--c-tok); }
+                .tok-lon::before { background: var(--c-tok); } .tok-lon::after { background: var(--c-lon); }
+                .lon-ny::before  { background: var(--c-lon); } .lon-ny::after  { background: var(--c-ny); }
     </style>
 </head>
 <body>
@@ -234,12 +272,21 @@
     </div>
 
     <div class="legend">
-        <div class="legend-item"><div class="dot" style="background: var(--c-wel);"></div> Wellington</div>
-        <div class="legend-item"><div class="dot" style="background: var(--c-syd);"></div> Sydney</div>
-        <div class="legend-item"><div class="dot" style="background: var(--c-tok);"></div> Tokyo</div>
-        <div class="legend-item"><div class="dot" style="background: var(--c-lon);"></div> London</div>
-        <div class="legend-item"><div class="dot" style="background: var(--c-ny);"></div> New York</div>
-    </div>
+            <div class="legend-group">
+                <div class="legend-title">SESSIONS</div>
+                <div class="legend-item"><div class="dot" style="background: var(--c-wel);"></div> Wellington</div>
+                <div class="legend-item"><div class="dot" style="background: var(--c-syd);"></div> Sydney</div>
+                <div class="legend-item"><div class="dot" style="background: var(--c-tok);"></div> Tokyo</div>
+                <div class="legend-item"><div class="dot" style="background: var(--c-lon);"></div> London</div>
+                <div class="legend-item"><div class="dot" style="background: var(--c-ny);"></div> New York</div>
+            </div>
+            <div class="legend-group">
+                <div class="legend-title">MAJOR OVERLAPS</div>
+                <div class="legend-item"><div class="dot overlap-dot syd-tok"></div> Syd-Tok</div>
+                <div class="legend-item"><div class="dot overlap-dot tok-lon"></div> Tok-Lon</div>
+                <div class="legend-item"><div class="dot overlap-dot lon-ny"></div> Lon-NY</div>
+            </div>
+        </div>
 </div>
 
 <script>
