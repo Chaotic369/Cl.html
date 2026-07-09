@@ -451,22 +451,42 @@
         cursor.style.left = `${(totalSeconds / 86400) * 100}%`;
 
         // Determine Active Sessions for the text readout
-        const active = processedMarkets.filter(market => {
-            if (market.start >= market.end) {
-                return totalSeconds >= market.start || totalSeconds < market.end; // Midnight overlap
-            }
-            return totalSeconds >= market.start && totalSeconds < market.end;
-        }).map(m => m.name);
+                const active = processedMarkets.filter(market => {
+                    if (market.start >= market.end) {
+                        return totalSeconds >= market.start || totalSeconds < market.end; // Midnight overlap
+                    }
+                    return totalSeconds >= market.start && totalSeconds < market.end;
+                }).map(m => m.name);
 
-        const activeTextEl = document.getElementById('active-text');
-        if (active.length === 0) {
-            activeTextEl.textContent = 'NO MAJOR MARKETS OPEN';
-            activeTextEl.style.color = 'var(--text-dim)';
-        } else {
-            activeTextEl.textContent = `ACTIVE: ${active.join(' + ').toUpperCase()}`;
-            activeTextEl.style.color = 'var(--c-wel)';
-        }
-    }
+                const activeTextEl = document.getElementById('active-text');
+                if (active.length === 0) {
+                    activeTextEl.textContent = 'NO MAJOR MARKETS OPEN';
+                    activeTextEl.style.color = 'var(--text-dim)';
+                    activeTextEl.style.textShadow = 'none';
+                } else {
+                    let displayText = active.join(' + ').toUpperCase();
+                    let color = 'var(--text-main)';
+                    let glow = 'none';
+            
+                    if (active.includes('London') && active.includes('New York')) {
+                        displayText = 'LON-NY OVERLAP (GOLDEN)';
+                        color = '#FFF'; glow = '0 0 10px rgba(255,255,255,0.5)';
+                    } else if (active.includes('Sydney') && active.includes('Tokyo')) {
+                        displayText = 'SYD-TOK OVERLAP';
+                        color = '#FFF'; glow = '0 0 10px rgba(255,255,255,0.5)';
+                    } else if (active.includes('Tokyo') && active.includes('London')) {
+                        displayText = 'TOK-LON OVERLAP';
+                        color = '#FFF'; glow = '0 0 10px rgba(255,255,255,0.5)';
+                    } else if (active.length === 1) {
+                        const singleId = MARKET_CONFIG.find(m => m.name === active[0]).id;
+                        color = `var(--c-${singleId})`;
+                    }
+
+                    activeTextEl.textContent = `ACTIVE: ${displayText}`;
+                    activeTextEl.style.color = color;
+                    activeTextEl.style.textShadow = glow;
+                }
+            }
 
     /* Boot sequence */
     buildTimeline();
