@@ -102,30 +102,30 @@
         }
 
         .single-line-track {
-            position: relative;
-            width: 100%;
-            height: 50px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.08);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+                    position: relative;
+                    width: 100%;
+                    height: 32px;
+                    background: rgba(255,255,255,0.03);
+                    border-radius: 8px;
+                    border: 1px solid rgba(255,255,255,0.08);
+                    overflow: hidden;
+                }
 
-        /* The multisections / lanes inside the single line */
-        .session-block {
-            position: absolute;
-            height: 10px; /* 5 sessions * 10px = 50px total height */
-            border-radius: 4px;
-            opacity: 0.9;
-        }
+                /* The multisections / lanes inside the single line */
+                .session-block {
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                    border-radius: 4px;
+                    opacity: 0.65;
+                    mix-blend-mode: screen;
+                }
 
-        .lane-wel { top: 0px;  background: var(--c-wel); box-shadow: 0 0 8px var(--c-wel); }
-        .lane-syd { top: 10px; background: var(--c-syd); box-shadow: 0 0 8px var(--c-syd); }
-        .lane-tok { top: 20px; background: var(--c-tok); box-shadow: 0 0 8px var(--c-tok); }
-        .lane-lon { top: 30px; background: var(--c-lon); box-shadow: 0 0 8px var(--c-lon); }
-        .lane-ny  { top: 40px; background: var(--c-ny);  box-shadow: 0 0 8px var(--c-ny);  }
+                .lane-wel { background: var(--c-wel); box-shadow: 0 0 8px var(--c-wel); }
+                .lane-syd { background: var(--c-syd); box-shadow: 0 0 8px var(--c-syd); }
+                .lane-tok { background: var(--c-tok); box-shadow: 0 0 8px var(--c-tok); }
+                .lane-lon { background: var(--c-lon); box-shadow: 0 0 8px var(--c-lon); }
+                .lane-ny  { background: var(--c-ny);  box-shadow: 0 0 8px var(--c-ny);  }
 
         /* Grid lines inside track */
         .grid-line {
